@@ -18,6 +18,8 @@ import (
 	"fmt"
 
 	"istio.io/istio/pilot/pkg/serviceregistry/aggregate"
+	"istio.io/istio/pilot/pkg/serviceregistry/ecs"
+	"istio.io/istio/pilot/pkg/serviceregistry/ecs/types"
 	kubecontroller "istio.io/istio/pilot/pkg/serviceregistry/kube/controller"
 	"istio.io/istio/pilot/pkg/serviceregistry/provider"
 	"istio.io/istio/pilot/pkg/serviceregistry/serviceentry"
@@ -54,6 +56,22 @@ func (s *Server) initServiceControllers(args *PilotArgs) error {
 			if err := s.initKubeRegistry(args); err != nil {
 				return err
 			}
+		case provider.Ecs:
+			log.Infof("Initializing ECS service registry for cluster=%s", args.RegistryOptions.EcsOptions.ClusterName)
+			ecsCfg := types.Config{
+				ClusterName:  args.RegistryOptions.EcsOptions.ClusterName,
+				Region:       args.RegistryOptions.EcsOptions.Region,
+				PollInterval: args.RegistryOptions.EcsOptions.PollInterval,
+			}
+			ecsReg, err := ecs.NewController(ecsCfg)
+			if err != nil {
+				return fmt.Errorf("failed to init ECS registry: %v", err)
+			}
+			serviceControllers.AddRegistry(ecsReg)
+			s.addStartFunc("ecs service registry", func(stop <-chan struct{}) error {
+				go ecsReg.Run(stop)
+				return nil
+			})
 		default:
 			return fmt.Errorf("service registry %s is not supported", r)
 		}

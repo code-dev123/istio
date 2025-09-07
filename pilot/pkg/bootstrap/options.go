@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"time"
 
+	"istio.io/istio/pilot/pkg/serviceregistry/ecs/types" // Added import for ecs
 	kubecontroller "istio.io/istio/pilot/pkg/serviceregistry/kube/controller"
 	"istio.io/istio/pkg/config/constants"
 	"istio.io/istio/pkg/ctrlz"
@@ -39,6 +40,7 @@ type RegistryOptions struct {
 	// Kubernetes controller options
 	KubeOptions kubecontroller.Options
 	// ClusterRegistriesNamespace specifies where the multi-cluster secret resides
+	EcsOptions                 types.Config
 	ClusterRegistriesNamespace string
 	KubeConfig                 string
 }

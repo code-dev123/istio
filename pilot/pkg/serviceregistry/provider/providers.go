@@ -24,6 +24,8 @@ const (
 	Kubernetes ID = "Kubernetes"
 	// External is a service registry for externally provided ServiceEntries
 	External ID = "External"
+	// ECS is a service registry backed by AWS ECS
+	Ecs ID = "ecs"
 )
 
 func (id ID) String() string {
